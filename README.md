@@ -9,3 +9,6 @@ computed filename already exists, the download will be skipped. To retry broken 
 you would need to delete them manually.
 
 Coded in ICE721 which is delayed about 45 minutes due to some signalling issues.
+
+
+This should be considered work in progress, I will probably add more features and options.

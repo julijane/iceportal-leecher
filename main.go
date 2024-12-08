@@ -31,8 +31,8 @@ func main() {
 
 	l := Leecher{}
 	l.fetchCookie()
-	l.fetchAllAudiobooks()
 	l.fetchAllMagazines()
+	l.fetchAllAudiobooks()
 }
 
 func (l *Leecher) fetchCookie() {
