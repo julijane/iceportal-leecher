@@ -42,8 +42,7 @@ func (l *Leecher) fetchMagazine(magazineID string) {
 		log.Fatal("Not free, skipping. Paymethod: ", magazine.Paymethod)
 	}
 
-	titleEncoded := strings.ReplaceAll(magazine.Title, " ", "_")
-	dirPath := path.Join("magazines", titleEncoded)
+	dirPath := path.Join("magazines", sanitizeFileOrPathName(magazine.Title))
 
 	resp, err := http.Get("https://iceportal.de/" + magazine.Navigation.Href)
 	if err != nil {
@@ -59,7 +58,7 @@ func (l *Leecher) fetchMagazine(magazineID string) {
 		"https://iceportal.de/"+magazine.Navigation.Href,
 		path.Join(
 			dirPath,
-			strings.ReplaceAll(magazine.Title, " ", "_")+"_"+magazine.Date+".pdf",
+			sanitizeFileOrPathName(magazine.Title)+"_"+magazine.Date+".pdf",
 		),
 	)
 	if err != nil {

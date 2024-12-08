@@ -103,3 +103,8 @@ func (l *Leecher) saveTo(url string, filePath string) error {
 	log.Print("Saved to ", filePath)
 	return nil
 }
+
+func sanitizeFileOrPathName(input string) string {
+	input = strings.ReplaceAll(input, " ", "_")
+	return strings.ReplaceAll(input, "/", "_")
+}

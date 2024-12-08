@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 )
 
@@ -45,7 +45,7 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 
 	dirPath := path.Join(
 		"audiobooks",
-		strings.ReplaceAll(audiobook.Title, " ", "_"),
+		sanitizeFileOrPathName(audiobook.Title),
 	)
 
 	if err = os.MkdirAll(dirPath, 0o0755); err != nil {
@@ -61,8 +61,8 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 			log.Fatal(err)
 		}
 
-		episodeFilename := strconv.Itoa(episode.SerialNumber) + "_" +
-			strings.ReplaceAll(episode.Title, " ", "_") + ".mp4"
+		episodeFilename := fmt.Sprintf("%03d", episode.SerialNumber) + "_" +
+			sanitizeFileOrPathName(episode.Title) + ".mp4"
 
 		err = l.saveTo(
 			"https://iceportal.de"+file.Path,
