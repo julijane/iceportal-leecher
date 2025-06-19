@@ -37,8 +37,9 @@ func (l *Leecher) fetchMagazine(magazineID string) {
 		sugar.Fatal(err)
 	}
 
-	if magazine.Paymethod != "free" && magazine.Paymethod != "freeCopy" {
-		sugar.Fatalf("Not free, skipping. Paymethod: %s", magazine.Paymethod)
+	if magazine.Paymethod != "free" && magazine.Paymethod != "freeCopy" && magazine.Paymethod != "" {
+		sugar.Infof("Not free, skipping. Paymethod: %s", magazine.Paymethod)
+		return
 	}
 
 	dirPath := path.Join("magazines", sanitizeFileOrPathName(magazine.Title))
