@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -21,12 +20,12 @@ func (l *Leecher) fetchAllMagazines() {
 	var magazines TeaserList
 	err := l.getJson("https://iceportal.de/api1/rs/page/zeitungskiosk", &magazines)
 	if err != nil {
-		panic(err)
+		sugar.Fatal(err)
 	}
 
 	for _, magazine := range magazines.TeaserGroups[0].Items {
 		magazineID := strings.Split(magazine.Navigation.Href, "/")[2]
-		log.Print("Fetching ", magazine.Title, " (", magazineID, ")")
+		sugar.Infof("Fetching %s (%s)", magazine.Title, magazineID)
 		l.fetchMagazine(magazineID)
 	}
 }
@@ -35,23 +34,23 @@ func (l *Leecher) fetchMagazine(magazineID string) {
 	var magazine Magazine
 	err := l.getJson("https://iceportal.de/api1/rs/page/zeitungskiosk/"+magazineID, &magazine)
 	if err != nil {
-		panic(err)
+		sugar.Fatal(err)
 	}
 
 	if magazine.Paymethod != "free" && magazine.Paymethod != "freeCopy" {
-		log.Fatal("Not free, skipping. Paymethod: ", magazine.Paymethod)
+		sugar.Fatalf("Not free, skipping. Paymethod: %s", magazine.Paymethod)
 	}
 
 	dirPath := path.Join("magazines", sanitizeFileOrPathName(magazine.Title))
 
 	resp, err := http.Get("https://iceportal.de/" + magazine.Navigation.Href)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	defer resp.Body.Close()
 
 	if err = os.MkdirAll(dirPath, 0o0755); err != nil {
-		log.Fatal("Creating directory for magazine: ", err)
+		sugar.Fatalf("Creating directory for magazine: %v", err)
 	}
 
 	err = l.saveTo(
@@ -62,6 +61,6 @@ func (l *Leecher) fetchMagazine(magazineID string) {
 		),
 	)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 }

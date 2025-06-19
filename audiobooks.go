@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -27,11 +26,11 @@ func (l *Leecher) fetchAllAudiobooks() {
 	var audiobooks TeaserList
 	err := l.getJson("https://iceportal.de/api1/rs/page/hoerbuecher", &audiobooks)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	for _, audiobook := range audiobooks.TeaserGroups[0].Items {
 		audiobookID := strings.Split(audiobook.Navigation.Href, "/")[2]
-		log.Print("Fetching ", audiobook.Title, " (", audiobookID, ")")
+		sugar.Infof("Fetching %s (%s)", audiobook.Title, audiobookID)
 		l.fetchAudiobook(audiobookID)
 	}
 }
@@ -40,7 +39,7 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 	var audiobook Audiobook
 	err := l.getJson("https://iceportal.de/api1/rs/page/hoerbuecher/"+audiobookID, &audiobook)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 
 	dirPath := path.Join(
@@ -49,16 +48,16 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 	)
 
 	if err = os.MkdirAll(dirPath, 0o0755); err != nil {
-		log.Fatal("Creating directory for audiobook: ", err)
+		sugar.Fatalf("Creating directory for audiobook: %v", err)
 	}
 
 	for _, episode := range audiobook.Files {
-		log.Println("Fetching episode", episode.SerialNumber, "-", episode.Title)
+		sugar.Infof("Fetching episode %d - %s", episode.SerialNumber, episode.Title)
 
 		var file File
 		err := l.getJson("https://iceportal.de/api1/rs/audiobooks/path"+episode.Path, &file)
 		if err != nil {
-			log.Fatal(err)
+			sugar.Fatal(err)
 		}
 
 		episodeFilename := fmt.Sprintf("%03d", episode.SerialNumber) + "_" +
@@ -72,7 +71,7 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 			),
 		)
 		if err != nil {
-			log.Fatal(err)
+			sugar.Fatal(err)
 		}
 	}
 }

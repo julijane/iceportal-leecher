@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/k0kubun/pp/v3"
+	"go.uber.org/zap"
 )
 
 type Leecher struct {
@@ -26,8 +26,17 @@ type TeaserList struct {
 	} `json:"teaserGroups"`
 }
 
+var sugar *zap.SugaredLogger
+
 func main() {
 	_ = pp.Print
+
+	rawLogger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	defer rawLogger.Sync()
+	sugar = rawLogger.Sugar()
 
 	l := Leecher{}
 	l.fetchCookie()
@@ -39,13 +48,13 @@ func (l *Leecher) fetchCookie() {
 	// make a request to the start page to obtain the session tookie cooen
 	resp, err := http.Get("https://iceportal.de")
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	resp.Body.Close()
 
 	cookieHeader := resp.Header.Get("Set-Cookie")
 	if cookieHeader == "" {
-		log.Fatal("No cookie header found")
+		sugar.Fatal("No cookie header found")
 	}
 
 	l.cookie = strings.Split(cookieHeader, ";")[0]
@@ -54,7 +63,7 @@ func (l *Leecher) fetchCookie() {
 func (l *Leecher) get(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 
 	if l.cookie != "" {
@@ -82,7 +91,7 @@ func (l *Leecher) getJson(url string, v any) error {
 
 func (l *Leecher) saveTo(url string, filePath string) error {
 	if _, err := os.Stat(filePath); err == nil {
-		log.Print("File ", filePath, " exists already, skipping")
+		sugar.Infof("File %s exists already, skipping", filePath)
 		return nil
 	}
 
@@ -94,13 +103,13 @@ func (l *Leecher) saveTo(url string, filePath string) error {
 
 	outFile, err := os.Create(filePath)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	defer outFile.Close()
 
 	io.Copy(outFile, resp.Body)
 
-	log.Print("Saved to ", filePath)
+	sugar.Infof("Saved to %s", filePath)
 	return nil
 }
 
