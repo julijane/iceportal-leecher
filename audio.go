@@ -22,29 +22,29 @@ type File struct {
 	Path string `json:"path"`
 }
 
-func (l *Leecher) fetchAllAudiobooks() {
-	var audiobooks TeaserList
-	err := l.getJson("https://iceportal.de/api1/rs/page/hoerbuecher", &audiobooks)
+func (l *Leecher) fetchAllAudio(subsection string) {
+	var audiolist TeaserList
+	err := l.getJson("https://iceportal.de/api1/rs/page/"+subsection, &audiolist)
 	if err != nil {
 		sugar.Fatal(err)
 	}
-	for _, audiobook := range audiobooks.TeaserGroups[0].Items {
-		audiobookID := strings.Split(audiobook.Navigation.Href, "/")[2]
-		sugar.Infof("Fetching %s (%s)", audiobook.Title, audiobookID)
-		l.fetchAudiobook(audiobookID)
+	for _, audio := range audiolist.TeaserGroups[0].Items {
+		audioID := strings.Split(audio.Navigation.Href, "/")[2]
+		sugar.Infof("Fetching %s (%s)", audio.Title, audioID)
+		l.fetchAudio(subsection, audioID)
 	}
 }
 
-func (l *Leecher) fetchAudiobook(audiobookID string) {
+func (l *Leecher) fetchAudio(subsection string, audiobookID string) {
 	var audiobook Audiobook
-	err := l.getJson("https://iceportal.de/api1/rs/page/hoerbuecher/"+audiobookID, &audiobook)
+	err := l.getJson("https://iceportal.de/api1/rs/page/"+subsection+"/"+audiobookID, &audiobook)
 	if err != nil {
 		sugar.Errorf("Fetching audiobook metadata: %v", err)
 		return
 	}
 
 	dirPath := path.Join(
-		"audiobooks",
+		subsection,
 		sanitizeFileOrPathName(audiobook.Title),
 	)
 
