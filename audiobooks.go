@@ -39,7 +39,8 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 	var audiobook Audiobook
 	err := l.getJson("https://iceportal.de/api1/rs/page/hoerbuecher/"+audiobookID, &audiobook)
 	if err != nil {
-		sugar.Fatal(err)
+		sugar.Errorf("Fetching audiobook metadata: %v", err)
+		return
 	}
 
 	dirPath := path.Join(
@@ -55,7 +56,7 @@ func (l *Leecher) fetchAudiobook(audiobookID string) {
 		sugar.Infof("Fetching episode %d - %s", episode.SerialNumber, episode.Title)
 
 		var file File
-		err := l.getJson("https://iceportal.de/api1/rs/audiobooks/path"+episode.Path, &file)
+		err := l.getJson("https://iceportal.de/api1/rs/"+episode.Path, &file)
 		if err != nil {
 			sugar.Fatal(err)
 		}
