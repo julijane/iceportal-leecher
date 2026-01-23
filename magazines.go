@@ -24,7 +24,12 @@ func (l *Leecher) fetchAllMagazines() {
 	}
 
 	for _, magazine := range magazines.TeaserGroups[0].Items {
-		magazineID := strings.Split(magazine.Navigation.Href, "/")[2]
+		splitted := strings.Split(magazine.Navigation.Href, "/")
+		if len(splitted) < 3 {
+			sugar.Warnf("Invalid magazine href: %s", magazine.Navigation.Href)
+			continue
+		}
+		magazineID := splitted[2]
 		sugar.Infof("Fetching %s (%s)", magazine.Title, magazineID)
 		l.fetchMagazine(magazineID)
 	}
